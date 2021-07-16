@@ -100,7 +100,7 @@ print(f"---------------------------")
 ##
  
 # specify the file to which the code will be printed
-output_file=os.path.join('.', 'PyPoll', 'Resources', 'election_data_revised.text')
+output_file=os.path.join("Resources", "election_data_analysis.txt")
  
 ##
  
