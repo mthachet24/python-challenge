@@ -1,116 +1,53 @@
-# import the os and csv
 import os
 import csv
- 
- 
- 
-# define the variables
-total_of_months=0
-net_amount_change=0
-monthly_change_rate=[]
-month_count_total=[]
-greatest_increase=0
-greatest_increase_month=0
-greatest_decrease=0
-greatest_decrease_month=0
- 
- 
- 
-# set a file for the path to print to
-csvpath=os.path.join("Resources", "budget_data.csv")
- 
- 
- 
- 
-#open + read the csv file 
-with open(csvpath, newline='') as csvfile:
-   
-    csvreader=csv.reader(csvfile, delimiter=',')
-   
- 
- 
-    # header row read 
-    csv_header=next(csvreader)
-    row=next(csvreader)
- 
- 
+
+nmonths = 0
+totalchange = 0
+maxinc = 0
+maxincdate = ""
+maxdec = 0
+maxdeccdate = ""
+previous = 0.0
+avgchange = 0
     
-    # calc # months, net amt p/l, row variables
-    previous_row=int(row[1])
-    total_of_months+=1
-    net_amount_change+=int(row[1])
-    greatest_increase=int(row[1])
-    greatest_increase_month=row[0]
- 
- 
- 
+csvpath = os.path.join('Resources/budget_data.csv')
+with open(csvpath, newline='') as csvfile:
+    csvreader = csv.reader(csvfile, delimiter=',')
+    next(csvreader,None) 
+
     for row in csvreader:
- 
- 
-        
-        # define num of months found in ds
-        total_of_months+=1
-        # define net amt of p/l in whole
-        net_amount_change+=int(row[1])
- 
- 
- 
-        # calculate change from now to previous month
-        revenue_change=int(row[1]) -previous_row
-        monthly_change_rate.append(revenue_change)
-        previous_row=int(row[1])
-        month_count_total.append(row[0])
- 
- 
- 
-        
-        #calc greatest inc
-        if int(row[1]) >greatest_increase:
-            greatest_increase=int(row[1])
-            greatest_increase_month=row[0]
-  
- 
-          
-        #calc greatest dec
-        if int(row[1]) <greatest_decrease:
-            greatest_decrease=int(row[1])
-            greatest_decrease_month=row[0]  
- 
- 
- 
-        
-    # calc avg + date
-    average_change=sum(monthly_change_rate)/len(monthly_change_rate)
-    highest=max(monthly_change_rate)
-    lowest=min(monthly_change_rate)
- 
- 
- 
-# print financial analysis
-print(f"Financial Analysis")
-print(f"---------------------------")
-print(f"Total Months: {total_of_months}")
-print(f"Total: ${net_amount_change}")
-print(f"Average Change: ${average_change:.2f}")
-print(f"Greatest Increase in Profits:, {greatest_increase_month}, (${highest})")
-print(f"Greatest Decrease in Profits:, {greatest_decrease_month}, (${lowest})")
- 
- 
- 
-# file it needs to be written to
-output_file=os.path.join("Resources", "budget_analysis.txt")
- 
- 
-with open(output_file, 'w',) as txtfile:
- 
- 
-#rewrite with new data in file
- 
- 
-    txtfile.write(f"Financial Analysis\n")
-    txtfile.write(f"---------------------------\n")
-    txtfile.write(f"Total Months: {total_of_months}\n")
-    txtfile.write(f"Total: ${net_amount_change}\n")
-    txtfile.write(f"Average Change: ${average_change}\n")
-    txtfile.write(f"Greatest Increase in Profits:, {greatest_increase_month}, (${highest})\n")
-    txtfile.write(f"Greatest Decrease in Profits:, {greatest_decrease_month}, (${lowest})\n")
+        current = float(row[1])
+        if nmonths == 0:
+            maxinc = 0.0
+            maxdec = 0.0
+            maxincdate = row[0]
+            maxdecdate = row[0]
+        else:
+            delta = current - previous
+            avgchange += delta
+            if delta > maxinc:
+                maxinc = delta
+                maxincdate = row[0]
+            elif delta < maxdec:
+                maxdec = delta
+                maxdecdate = row[0]
+
+        previous = current
+        nmonths += 1
+        totalchange += float(row[1])
+
+avgchange = avgchange / (nmonths-1)
+
+results = []
+results.append("Financial Analysis\n----------------------------")
+results.append(f"Total Months: {nmonths}")
+results.append(f"Total: ${round(totalchange)}")
+results.append(f"Average Change: ${round(avgchange,2)}")
+results.append(f"Greatest Increase in Profits: {maxincdate} (${round(maxinc)})")
+results.append(f"Greatest Decrease in Profits: {maxdecdate} (${round(maxdec)})")
+
+filename = 'Results.txt'
+with open(filename, 'w') as file:
+    for result in results:
+        print(result)
+        file.write(result + '\n')
